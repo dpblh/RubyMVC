@@ -17,17 +17,24 @@ class Route
 	end
 
 	def self.get_request(request, response)
-		raise WEBrick::HTTPStatus::NotFound unless matcher request.path, @@_get
-		action = action_with_params(request.path, @@_get);
+		_request @@_get, request, response
+	end
+	def self.post_request(request, response)
+		_request @@_post, request, response
+	end
+	def self.put_request(request, response)
+		_request @@_put, request, response
+	end
+	def self.delete_request(request, response)
+		_request @@_delete, request, response
+	end
+
+	def self._request(list, request, response)
+		raise WEBrick::HTTPStatus::NotFound unless matcher request.path, list
+		action = action_with_params(request.path, list);
 		params = build_params request.path, action[:params_id]
 		execute_action(request.path, action, params, request, response)
 		raise WEBrick::HTTPStatus::OK
-	end
-	def self.post_request(request, response)
-	end
-	def self.put_request(request, response)
-	end
-	def self.delete_request(request, response)
 	end
 
 

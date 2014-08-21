@@ -1,6 +1,6 @@
 class PersonController < Controller
 	def index
-		send_data JSON.generate(data: 'Hello, index')
+		render 'person/index', 'tim'
 	end
 	def show
 		send_data JSON.generate(data: params)
