@@ -5,7 +5,8 @@ class Autoload
 end
 
 class Route
+	get 'person/(:id)/parent/(:parent_id)', controller: :Person, action: :show
+	get 'person/edit', controller: :Person, action: :edit
+	get 'person/(:id)', controller: :Person, action: :show
 	get 'person', controller: :Person, action: :index
-	get 'person/(:id)', controller: :Person, action: :index
-	get 'person/show', controller: :Person, action: :show
 end 

@@ -4,20 +4,24 @@ class Route
 	@@_put =[]
 	@@_delete =[]
 	def self.get(url_template, hash)
+		@@_get << build_matcher(url_template, hash)
 	end
 	def self.post(url_template, hash)
+		@@_post << build_matcher(url_template, hash)
 	end
 	def self.put(url_template, hash)
+		@@_put << build_matcher(url_template, hash)
 	end
 	def self.delete(url_template, hash)
+		@@_delete << build_matcher(url_template, hash)
 	end
 
 	def self.get_request(request, response)
-		controller_action = get_controller_action(request.path)
-		controller = controller_action[:controller].new
-		controller.send 'request=', request
-		controller.send 'response=', response
-		controller.send controller_action[:action]
+		raise WEBrick::HTTPStatus::NotFound unless matcher request.path, @@_get
+		action = action_with_params(request.path, @@_get);
+		params = build_params request.path, action[:params_id]
+		execute_action(request.path, action, params, request, response)
+		raise WEBrick::HTTPStatus::OK
 	end
 	def self.post_request(request, response)
 	end
@@ -26,13 +30,47 @@ class Route
 	def self.delete_request(request, response)
 	end
 
-	def self.get_controller_action(path)
-		path = path[1..-1].split '/'
-		module_name = path[0..-2].join('/') << '_controller'
-		klass_name = Autoload.path_to_module(module_name.split('/'));
-		klass = Object.const_get(klass_name)
-		klass_method = path[1]
-		{controller: klass, action: klass_method}
+
+	def self.matcher(url, list)
+		list.any?{|url_matcher| url =~ Regexp.new(url_matcher[:matcher])}
+	end
+
+	def self.build_params(url, action_params_id)
+		params = {}
+		url[1..-1].split('/').each_with_index do |part, index|
+			params[action_params_id[index]] = part unless action_params_id[index].nil?
+		end
+		params
+	end
+
+	def self.action_with_params(url, list)
+		list.find{|item| url =~ Regexp.new(item[:matcher])}
+	end
+
+	def self.build_matcher(url_template, hash)
+		params = {}
+		url_template.split('/').each_with_index do |path,index|
+			var = path.scan(/:(\w*)/)
+			unless var.empty?
+				params[index] = var.flatten.first
+			end
+		end
+		matcher = url_template.gsub /\(:\w*\)/, '\w*'
+		{
+			matcher: matcher,
+			params_id: params,
+			controller: hash[:controller].to_s + 'Controller',
+			action: hash[:action]
+		}
+	end
+
+	def self.execute_action(path, action, params, request, response)
+		controller = Object.const_get action[:controller]
+		controller_instance = controller.new
+		controller_instance.send 'request=', request
+		controller_instance.send 'response=', response
+		controller_instance.send 'params=', params
+		controller_instance.send action[:action]
 	end
 
 end
