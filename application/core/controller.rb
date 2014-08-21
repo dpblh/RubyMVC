@@ -4,8 +4,19 @@ class Controller
 		@response['Content-Type'] = 'text/javascript'
 		@response.body = data
 	end
-	def render(view_path, data={})
+	def render(view_path)
 		@response['Content-Type'] = 'text/html'
-		@response.body = View.render view_path
+		@response.body = renderer 'template' do
+			ERB.new(File.read(File.join(__FILE__, "../../views/#{view_path}.html.erb"))).result(binding())
+		end
 	end
+	def renderer(view_path)
+		ERB.new(File.read(File.join(__FILE__, "../../views/#{view_path}.html.erb"))).result(binding())
+	end
+
+	def self.render(view_path, request, response)
+		response['Content-Type'] = 'text/html'
+		response.body = ERB.new(File.read(File.join(__FILE__, "../../views/#{view_path}.html.erb"))).result(binding())
+	end
+
 end

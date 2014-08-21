@@ -1,3 +1,6 @@
+require 'uri'
+require 'cgi'
+
 class Route
 	@@_get =[]
 	@@_post =[]
@@ -30,11 +33,19 @@ class Route
 	end
 
 	def self._request(list, request, response)
-		raise WEBrick::HTTPStatus::NotFound unless matcher request.path, list
-		action = action_with_params(request.path, list);
-		params = build_params request.path, action[:params_id]
-		execute_action(request.path, action, params, request, response)
-		raise WEBrick::HTTPStatus::OK
+		begin
+			raise WEBrick::HTTPStatus::NotFound unless matcher request.path, list
+			action = action_state(request.path, list);
+			params = build_params request.path, action[:params_id], request.query
+			execute_action(request.path, action, params, request, response)
+			# raise WEBrick::HTTPStatus::OK
+		rescue WEBrick::HTTPStatus::NotFound => e
+			Controller.render '404', request, response
+		rescue WEBrick::HTTPStatus::ServerError => e
+			Controller.render '500', request, response
+		# rescue Exception
+		# 	Controller.render '500', request, response
+		end
 	end
 
 
@@ -42,15 +53,15 @@ class Route
 		list.any?{|url_matcher| url =~ Regexp.new(url_matcher[:matcher])}
 	end
 
-	def self.build_params(url, action_params_id)
+	def self.build_params(url, action_params_id, http_params)
 		params = {}
 		url[1..-1].split('/').each_with_index do |part, index|
 			params[action_params_id[index]] = part unless action_params_id[index].nil?
 		end
-		params
+		params.merge http_params
 	end
 
-	def self.action_with_params(url, list)
+	def self.action_state(url, list)
 		list.find{|item| url =~ Regexp.new(item[:matcher])}
 	end
 

@@ -1,5 +1,2 @@
-class Person
-	def self.getName()
-		'tim'
-	end
+class Person < Model
 end

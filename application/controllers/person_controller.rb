@@ -1,11 +1,17 @@
 class PersonController < Controller
 	def index
-		render 'person/index', 'tim'
+		@persons = Person.findAll
+		render 'person/index'
 	end
 	def show
-		send_data JSON.generate(data: params)
+		@person = Person.findById params['id']
+		render 'person/show'
+	end
+	def new
+		@person = Person.new
 	end
 	def edit
-		send_data JSON.generate(data: :edit)
+		@person = Person.findById params['id']
+		render 'person/edit'
 	end
 end

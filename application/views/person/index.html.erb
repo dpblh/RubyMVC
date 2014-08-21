@@ -1,1 +1,21 @@
-<h1>HELLO <%= @item %><%= Time.now %></h1>
+<table>
+	<thead>
+		<tr>
+			<td>first name</td>
+			<td>last name</td>
+			<td>middle name</td>
+		</tr>
+	</thead>
+	<tbody>
+		<% @persons.each do |person| %>
+			<tr>
+				<td><%= person[:firstName] %></td>
+				<td><%= person[:lastName] %></td>
+				<td><%= person[:middleName] %></td>
+				<td><a href="/person/<%= person[:id] %>">show</a></td>
+			</tr>
+		<% end %>
+	</tbody>
+</table>
+
+<a href="/person/new">new</a>
