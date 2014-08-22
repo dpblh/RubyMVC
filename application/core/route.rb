@@ -2,42 +2,55 @@ require 'uri'
 require 'cgi'
 
 class Route
-	@@_get =[]
-	@@_post =[]
-	@@_put =[]
-	@@_delete =[]
+
+	attr_accessor :request, :response, :method_list
+	@@routing = {
+		'GET'=>[],
+		'POST'=>[],
+		'PUT'=>[],
+		'DELETE'=>[]
+	}
+
+	def initialize (request, response)
+		@request = request
+		@response = response
+		@method_list = @@routing[method]
+		send_response		
+	end 
+
+	def method
+		http_method = @request.request_method
+		_method = @request.query['_method']
+		if http_method == 'GET'
+			return 'GET'
+		elsif http_method == 'PUT' or (http_method == 'POST' and _method == 'PUT')
+			return 'PUT'
+		elsif http_method == 'DELETE' or (http_method == 'POST' and _method == 'DELETE')
+			return 'DELETE'
+		else
+			return 'POST'
+		end
+	end
+
 	def self.get(url_template, hash)
-		@@_get << build_matcher(url_template, hash)
+		@@routing['GET'] << build_matcher(url_template, hash)
 	end
 	def self.post(url_template, hash)
-		@@_post << build_matcher(url_template, hash)
+		@@routing['POST'] << build_matcher(url_template, hash)
 	end
 	def self.put(url_template, hash)
-		@@_put << build_matcher(url_template, hash)
+		@@routing['PUT'] << build_matcher(url_template, hash)
 	end
 	def self.delete(url_template, hash)
-		@@_delete << build_matcher(url_template, hash)
+		@@routing['DELETE'] << build_matcher(url_template, hash)
 	end
 
-	def self.get_request(request, response)
-		_request @@_get, request, response
-	end
-	def self.post_request(request, response)
-		_request @@_post, request, response
-	end
-	def self.put_request(request, response)
-		_request @@_put, request, response
-	end
-	def self.delete_request(request, response)
-		_request @@_delete, request, response
-	end
-
-	def self._request(list, request, response)
+	def send_response()
 		begin
-			raise WEBrick::HTTPStatus::NotFound unless matcher request.path, list
-			action = action_state(request.path, list);
-			params = build_params request.path, action[:params_id], request.query
-			execute_action(request.path, action, params, request, response)
+			raise WEBrick::HTTPStatus::NotFound unless find_matcher 
+			action = action_state
+			params = build_params action[:params_id]
+			execute_action action, params
 			# raise WEBrick::HTTPStatus::OK
 		rescue WEBrick::HTTPStatus::NotFound => e
 			Controller.render '404', request, response
@@ -49,24 +62,24 @@ class Route
 	end
 
 
-	def self.matcher(url, list)
-		list.any?{|url_matcher| url =~ Regexp.new(url_matcher[:matcher])}
+	def find_matcher
+		method_list.any?{|details| request.path =~ Regexp.new(details[:matcher])}
 	end
 
-	def self.build_params(url, action_params_id, http_params)
-		params = {}
-		url[1..-1].split('/').each_with_index do |part, index|
+	def build_params(action_params_id)
+		params = Hash.new
+		request.path[1..-1].split('/').each_with_index do |part, index|
 			params[action_params_id[index]] = part unless action_params_id[index].nil?
 		end
-		params.merge http_params
+		params.merge request.query
 	end
 
-	def self.action_state(url, list)
-		list.find{|item| url =~ Regexp.new(item[:matcher])}
+	def action_state
+		method_list.find{|details| request.path =~ Regexp.new(details[:matcher])}
 	end
 
 	def self.build_matcher(url_template, hash)
-		params = {}
+		params = Hash.new
 		url_template.split('/').each_with_index do |path,index|
 			var = path.scan(/:(\w*)/)
 			unless var.empty?
@@ -82,7 +95,7 @@ class Route
 		}
 	end
 
-	def self.execute_action(path, action, params, request, response)
+	def execute_action(action, params)
 		controller = Object.const_get action[:controller]
 		controller_instance = controller.new
 		controller_instance.send 'request=', request

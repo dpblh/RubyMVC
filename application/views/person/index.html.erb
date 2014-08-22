@@ -9,10 +9,10 @@
 	<tbody>
 		<% @persons.each do |person| %>
 			<tr>
-				<td><%= person[:firstName] %></td>
-				<td><%= person[:lastName] %></td>
-				<td><%= person[:middleName] %></td>
-				<td><a href="/person/<%= person[:id] %>">show</a></td>
+				<td><%= person['firstName'] %></td>
+				<td><%= person['lastName'] %></td>
+				<td><%= person['middleName'] %></td>
+				<td><a href="/person/<%= person['id'] %>">show</a></td>
 			</tr>
 		<% end %>
 	</tbody>

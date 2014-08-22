@@ -4,17 +4,17 @@
 		<td>last name</td>
 		<td>middle name</td>
 	</tr>
-		<td><%= @person[:firstName] %></td>
-		<td><%= @person[:lastName] %></td>
-		<td><%= @person[:middleName] %></td>
+		<td><%= @person['firstName'] %></td>
+		<td><%= @person['lastName'] %></td>
+		<td><%= @person['middleName'] %></td>
 	<tr>
 </table>
 
-<form action="/person/<%= @person[:id] %>" method="post">
+<form action="/person/<%= @person['id'] %>" method="post">
 	<input type="hidden" name="_method" value="delete">
 	<input type="submit" value="delete">
 </form>
 
-<form action="/person/<%= @person[:id] %>/edit" method="get">
+<form action="/person/<%= @person['id'] %>/edit" method="get">
 	<input type="submit" value="edit">
 </form>
