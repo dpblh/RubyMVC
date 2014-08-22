@@ -15,12 +15,24 @@ class Route
 		@request = request
 		@response = response
 		@method_list = @@routing[method]
-		send_response		
+		begin
+			raise WEBrick::HTTPStatus::NotFound unless find_matcher 
+			action = action_state
+			params = build_params action[:params_id]
+			execute_action action, params
+			# raise WEBrick::HTTPStatus::OK
+		rescue WEBrick::HTTPStatus::NotFound => e
+			Controller.render '404', request, response
+		rescue WEBrick::HTTPStatus::ServerError => e
+			Controller.render '500', request, response
+		# rescue Exception
+		# 	Controller.render '500', request, response
+		end
 	end 
 
 	def method
-		http_method = @request.request_method
-		_method = @request.query['_method']
+		http_method = request.request_method
+		_method = request.query['_method']
 		if http_method == 'GET'
 			return 'GET'
 		elsif http_method == 'PUT' or (http_method == 'POST' and _method == 'PUT')
@@ -44,23 +56,6 @@ class Route
 	def self.delete(url_template, hash)
 		@@routing['DELETE'] << build_matcher(url_template, hash)
 	end
-
-	def send_response()
-		begin
-			raise WEBrick::HTTPStatus::NotFound unless find_matcher 
-			action = action_state
-			params = build_params action[:params_id]
-			execute_action action, params
-			# raise WEBrick::HTTPStatus::OK
-		rescue WEBrick::HTTPStatus::NotFound => e
-			Controller.render '404', request, response
-		rescue WEBrick::HTTPStatus::ServerError => e
-			Controller.render '500', request, response
-		# rescue Exception
-		# 	Controller.render '500', request, response
-		end
-	end
-
 
 	def find_matcher
 		method_list.any?{|details| request.path =~ Regexp.new(details[:matcher])}
