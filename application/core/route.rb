@@ -14,6 +14,8 @@ class Route
 	def initialize (request, response)
 		@request = request
 		@response = response
+		puts request.query
+		puts method
 		@method_list = @@routing[method]
 		begin
 			raise WEBrick::HTTPStatus::NotFound unless find_matcher 
@@ -33,6 +35,9 @@ class Route
 	def method
 		http_method = request.request_method
 		_method = request.query['_method']
+		_method.upcase! unless _method.nil?
+		puts "_method = #{_method}"
+		puts "_http_method = #{http_method}"
 		if http_method == 'GET'
 			return 'GET'
 		elsif http_method == 'PUT' or (http_method == 'POST' and _method == 'PUT')
@@ -55,6 +60,10 @@ class Route
 	end
 	def self.delete(url_template, hash)
 		@@routing['DELETE'] << build_matcher(url_template, hash)
+	end
+
+	def self.root(hash)
+		@@routing['GET'] << build_matcher('/', hash)
 	end
 
 	def find_matcher

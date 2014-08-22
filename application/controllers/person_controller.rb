@@ -5,7 +5,6 @@ class PersonController < Controller
 	end
 	def show
 		@person = Person.findById params['id']
-		puts "params id = #{@person}"
 		render 'person/show'
 	end
 	def new
@@ -14,6 +13,14 @@ class PersonController < Controller
 	end
 	def create
 		Person.save params
+		redirect '/person'
+	end
+	def update
+		Person.update params
+		redirect "/person/#{params['id']}"
+	end
+	def delete
+		Person.delete params
 		redirect '/person'
 	end
 	def edit

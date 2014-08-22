@@ -1,16 +1,16 @@
-<table>
-	<tr>
-		<td>first name</td>
-		<td>last name</td>
-		<td>middle name</td>
-	</tr>
-		<td><input type="text" name="firstName" value="<%= @person['firstName'] %>"></td>
-		<td><input type="text" name="lastName" value="<%= @person['lastName'] %>"></td>
-		<td><input type="text" name="middleName" value="<%= @person['middleName'] %>"></td>
-	<tr>
-</table>
+<form action="/person/<%= @person['id'] %>" method="post">
+	<table>
+		<tr>
+			<td>first name</td>
+			<td>last name</td>
+			<td>middle name</td>
+		</tr>
+			<td><input type="text" name="firstName" value="<%= @person['firstName'] %>"></td>
+			<td><input type="text" name="lastName" value="<%= @person['lastName'] %>"></td>
+			<td><input type="text" name="middleName" value="<%= @person['middleName'] %>"></td>
+		<tr>
+	</table>
 
-<form action="/person/<%= @person[:id] %>" method="post">
 	<input type="hidden" name="_method" value="put">
 	<input type="submit" value="update">
 </form>

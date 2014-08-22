@@ -10,6 +10,8 @@ class Route
 	get 'person/new', controller: :Person, action: :new
 	get 'person/(:id)', controller: :Person, action: :show
 	post 'person', controller: :Person, action: :create
+	put 'person/(:id)', controller: :Person, action: :update
 	get 'person', controller: :Person, action: :index
-	get '/', controller: :Person, action: :index
+	delete 'person', controller: :Person, action: :delete
+	root controller: :Person, action: :index
 end 

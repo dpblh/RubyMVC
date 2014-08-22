@@ -26,12 +26,15 @@ class DataBase
 		model
 	end
 	def self.update(model)
-		@@embeded_db[model['id']] = model
+		id = model['id'].to_i
+		model['id'] = id
+		puts id.to_i
+		@@embeded_db[id-1] = model
+		puts @@embeded_db
 		model
 	end
-	def self.datete(model)
-		model = @@embeded_db[model['id']]
-		@@embeded_db.remove model
+	def self.delete(model)
+		@@embeded_db.delete_at(model['id'].to_i - 1)
 		nil 
 	end
 
