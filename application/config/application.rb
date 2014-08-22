@@ -11,4 +11,5 @@ class Route
 	get 'person/(:id)', controller: :Person, action: :show
 	post 'person', controller: :Person, action: :create
 	get 'person', controller: :Person, action: :index
+	get '/', controller: :Person, action: :index
 end 
