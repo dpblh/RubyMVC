@@ -39,7 +39,7 @@ class DataBase
 	end
 
 	def self.columns
-		['lastName', 'firstName', 'middleName', 'id']
+		['lastName', 'firstName', 'middleName']
 	end
 	
 end
