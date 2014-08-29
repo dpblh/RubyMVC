@@ -1,0 +1,7 @@
+data_base:
+  data_provider:	DataProvider
+  host:	localhost
+  port:
+  username:	root
+  password:	timcykahax
+  database: test
